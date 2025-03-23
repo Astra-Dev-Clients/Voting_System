@@ -23,7 +23,7 @@
 <!-- Header -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center justify-content-center" href="#"> <img src="Assets/Img/logo11.png" alt="" class="img-fluid me-2" style="width: 39px; height: auto;"> <div class="d-flex flex-column">Church of God <br><small style="font-size: x-small;">7th Day New Jerusalem</small></div> </a>
+            <a class="navbar-brand d-flex align-items-center justify-content-center" href="#"> <img src="Assets/Img/logo11.png" alt="" class="img-fluid me-2" style="width: 39px; height: auto;"> <div class="d-flex flex-column">Zetech University<br><small style="font-size: x-small;">Invent your future</small></div> </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -80,13 +80,13 @@
                     </div>
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <img src="Assets/Img/Helping.jpg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Helping" loading="lazy">
+                            <img src="Assets/images/z@u.jpg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Helping" loading="lazy">
                         </div>
                         <div class="carousel-item">
-                            <img src="Assets/Img/Mission/Picture 023.jpg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Cross" loading="lazy">
+                            <img src="Assets/images/@zu.jpg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Cross" loading="lazy">
                         </div>
                         <div class="carousel-item">
-                            <img src="Assets/Img/baptism.jpg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Baptism" loading="lazy">
+                            <img src="Assets/images/zu.jpeg" class="d-block mx-lg-auto img-fluid" style="scale: 70%; border-radius: 2rem 0 2rem;" alt="Baptism" loading="lazy">
                         </div>
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
@@ -99,10 +99,10 @@
                     </button>
                 </div>
                 <div class="col-lg-6">
-                    <h1 class="display-5 fw-bold text-body-emphasis lh-2 mb-3">Bringing Light to the World</h1>
-                    <p class="lead">Join us in worship and experience God's love. Our mission is to bring hope, faith, and community to everyone. </p>
+                    <h1 class="display-5 fw-bold text-body-emphasis lh-2 mb-3">Bringing Light in the voting process</h1>
+                    <p class="lead">Zetech University is a leading institution in the field of technology and innovation. We are dedicated to providing the best education and training to our students. </p>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <a type="button" class="btn text-white btn-lg px-4 me-md-2" style="background-color: #1C1D3C;" href="#">Church Near You</a>
+                        <a type="button" class="btn text-white btn-lg px-4 me-md-2" style="background-color: #1C1D3C;" href="#">Learn on how to get started</a>
                         <button type="button" class="btn btn-outline-secondary btn-lg px-4">Learn More</button>
                     </div>
                 </div>
