@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Citizen Feedback Login</title>
+    <title>Online Voting Login</title>
     <style>
         body {
             margin: 0;
@@ -115,14 +115,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="login-container">
         <form class="login-form" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
-            <h1>Citizen Feedback Login</h1>
+            <h1>Student Online Voting Login</h1>
             <label for="email_or_adm_no">Email or Admission Number:</label>
             <input type="text" id="email_or_adm_no" name="email_or_adm_no" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Login</button>
             <p class="error-message"><?php echo $error; ?></p>
+            <p>Don't have an account? <a href="signup.php">Register</a></p>
         </form>
+       
     </div>
 </body>
 </html>

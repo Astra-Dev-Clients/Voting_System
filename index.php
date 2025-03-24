@@ -36,19 +36,19 @@
                         <a class="nav-link" href="">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Sermons</a>
+                        <a class="nav-link" href="">Campaigns</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Missions
+                          Voting
                          </a>
                          <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Burundi</a></li>
-                            <li><a class="dropdown-item" href="#">Congo</a></li>
+                            <li><a class="dropdown-item" href="#">Vote</a></li>
+                            <li><a class="dropdown-item" href="#">View Results</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="#">Tanzania</a></li>
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
                         </ul>
                     </li>
 

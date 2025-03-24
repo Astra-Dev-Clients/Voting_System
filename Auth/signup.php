@@ -6,7 +6,7 @@ if (isset($_POST['submit'])) {
     $firstName = $_POST['first_name'];
     $lastName = $_POST['last_name'];
     $admNo = $_POST['adm_no'];
-    $email = $_POST['email'];
+    $email = strtolower($lastName . $firstName[0] . '@zetech.ac.ke'); // Construct the email
     $pass = password_hash($_POST['pass'], PASSWORD_BCRYPT); // Hash the password for security
 
     $sql = "INSERT INTO users (First_Name, Last_Name, Adm_No, Email, Pass) VALUES ('$firstName', '$lastName', '$admNo', '$email', '$pass')";
@@ -45,8 +45,9 @@ if (isset($_POST['submit'])) {
         }
 
         .container {
+            margin-top: 130px;
             max-width: 400px;
-            margin: auto;
+            
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 5px;
@@ -55,6 +56,7 @@ if (isset($_POST['submit'])) {
 
         h1 {
             text-align: center;
+            margin-top: 20px;
         }
 
         label {
@@ -87,7 +89,7 @@ if (isset($_POST['submit'])) {
 </head>
 <body>
     <div class="container">
-        <h1>Citizen Feedback Sign-Up</h1>
+        <h1>Online Voter Sign-Up</h1>
         <form action="signup.php" method="POST">
             <label for="first-name">First Name:</label>
             <input type="text" id="first-name" name="first_name" required>
@@ -108,6 +110,8 @@ if (isset($_POST['submit'])) {
             <input type="password" id="confirm-password" name="confirm" required>
 
             <button type="submit" name="submit">Sign Up</button>
+            <!-- already have an account login -->
+            <p>Already have an account? <a href="login.php">Login</a></p>
         </form>
     </div>
 </body>
