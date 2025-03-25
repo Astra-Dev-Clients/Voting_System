@@ -1,10 +1,17 @@
 <!-- connect to db -->
 <?php
 
-    $conn = new mysqli("localhost", "root", "22092209", "Online_Voting");
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "voting_system";
 
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+
+// Check connection
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
 
 ?>
