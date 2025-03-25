@@ -3,24 +3,60 @@ include '../../includes/header.php';
 require_once '../../Database/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['Adm_No']) && !isset($_POST['position'])) {
+        // Fetch user details based on Adm_No (for AJAX request)
+        $Adm_No = $_POST['Adm_No'];
+        $stmt = $conn->prepare("SELECT First_Name, Last_Name, Course, Year_of_Study FROM users WHERE Adm_No = ?");
+        $stmt->bind_param("s", $Adm_No);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        echo json_encode($user);
+        exit;
+    }
+
     // Handle form submission to add a new candidate
-    $first_name = $_POST['first_name'];
-    $last_name = $_POST['last_name'];
+    $Adm_No = $_POST['Adm_No'];
     $position = $_POST['position'];
-    $course = $_POST['course'];
-    $year_of_study = $_POST['year_of_study'];
     $manifesto = $_POST['manifesto'];
     $photo = $_POST['photo']; // Assuming photo is a URL or file path
 
-    $sql = "INSERT INTO candidates (First_Name, Last_Name, Position, Course, Year_of_Study, Manifesto, Photo) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssiss", $first_name, $last_name, $position, $course, $year_of_study, $manifesto, $photo);
+    // Check if candidate already exists
+    $stmt = $conn->prepare("SELECT * FROM candidates WHERE Adm_No = ?");
+    $stmt->bind_param("s", $Adm_No);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($stmt->execute()) {
-        echo "<div class='alert alert-success'>Candidate added successfully!</div>";
+    if ($result->num_rows > 0) {
+        echo "<div class='alert alert-danger'>Candidate already exists!</div>";
     } else {
-        echo "<div class='alert alert-danger'>Error adding candidate: " . $conn->error . "</div>";
+        // Fetch user details from the database
+        $stmt = $conn->prepare("SELECT First_Name, Last_Name, Course, Year_of_Study FROM users WHERE Adm_No = ?");
+        $stmt->bind_param("s", $Adm_No);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if ($user) {
+            $first_name = $user['First_Name'];
+            $last_name = $user['Last_Name'];
+            $course = $user['Course'];
+            $year_of_study = $user['Year_of_Study'];
+
+            // Insert candidate into database
+            $sql = "INSERT INTO candidates (Adm_No, First_Name, Last_Name, Position, Course, Year_of_Study, Manifesto, Photo) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssssiss", $Adm_No, $first_name, $last_name, $position, $course, $year_of_study, $manifesto, $photo);
+
+            if ($stmt->execute()) {
+                echo "<div class='alert alert-success'>Candidate added successfully!</div>";
+            } else {
+                echo "<div class='alert alert-danger'>Error adding candidate: " . $conn->error . "</div>";
+            }
+        } else {
+            echo "<div class='alert alert-danger'>Invalid Admission Number!</div>";
+        }
     }
 }
 ?>
@@ -29,24 +65,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1 class="text-center mb-5">Add New Candidate</h1>
     <form method="POST" action="">
         <div class="mb-3">
-            <label for="first_name" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="first_name" name="first_name" required>
-        </div>
-        <div class="mb-3">
-            <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="last_name" name="last_name" required>
+            <label for="Adm_No" class="form-label">Admission Number</label>
+            <select class="form-control" id="Adm_No" name="Adm_No" required>
+                <option value="">Select Admission Number</option>
+                <?php
+                $result = $conn->query("SELECT Adm_No FROM users");
+                while ($row = $result->fetch_assoc()) {
+                    echo "<option value='" . $row['Adm_No'] . "'>" . $row['Adm_No'] . "</option>";
+                }
+                ?>
+            </select>
         </div>
         <div class="mb-3">
             <label for="position" class="form-label">Position</label>
-            <input type="text" class="form-control" id="position" name="position" required>
-        </div>
-        <div class="mb-3">
-            <label for="course" class="form-label">Course</label>
-            <input type="text" class="form-control" id="course" name="course" required>
-        </div>
-        <div class="mb-3">
-            <label for="year_of_study" class="form-label">Year of Study</label>
-            <input type="number" class="form-control" id="year_of_study" name="year_of_study" required>
+            <select class="form-control" id="position" name="position" required>
+                <option value="" disabled selected>Select Position</option>
+                <option value="President">President</option>
+                <option value="Welfare">Welfare</option>
+                <option value="Sports">Sports</option>
+                <option value="Academics">Academics</option>
+            </select>
         </div>
         <div class="mb-3">
             <label for="manifesto" class="form-label">Manifesto</label>
