@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$conn = new mysqli("localhost", "root", "22092209", "voting_system");
+include "../../Database/db.php";
 
 // Check connection
 if ($conn->connect_error) {

@@ -120,7 +120,7 @@ $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_can
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="usersDropdown">
                         <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
-                        <li><a class="dropdown-item" href="./pages/add_users.php">Add User</a></li>
+                        <li><a class="dropdown-item" href="./add_users.php">Add User</a></li>
                         <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
                     </ul>
                 </li>
@@ -171,7 +171,7 @@ $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_can
             </a>
             <ul class="dropdown-menu" aria-labelledby="usersDropdown">
                 <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
-                <li><a class="dropdown-item" href="./pages/add_users.php">Add User</a></li>
+                <li><a class="dropdown-item" href="./add_users.php">Add User</a></li>
                 <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
             </ul>
         </li>

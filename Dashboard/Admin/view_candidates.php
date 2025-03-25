@@ -28,12 +28,7 @@
             <tbody>
                 <?php
                 // Database connection
-                $conn = new mysqli("localhost", "root", "22092209", "voting_system");
-
-                // Check connection
-                if ($conn->connect_error) {
-                    die("Connection failed: " . $conn->connect_error);
-                }
+                include "../../Database/db.php";
 
                 // Fetch candidates data
                 $sql = "SELECT * FROM candidates";
