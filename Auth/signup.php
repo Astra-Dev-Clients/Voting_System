@@ -2,53 +2,30 @@
 
 include '../Database/db.php';
 
-$error = "";
-$success = "";
 
+
+
+$error = '';
+$success = '';
 if (isset($_POST['submit'])) {
-    $firstName = mysqli_real_escape_string($conn, $_POST['first_name']);
-    $lastName = mysqli_real_escape_string($conn, $_POST['last_name']);
-    $admNo = mysqli_real_escape_string($conn, $_POST['adm_no']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $course = mysqli_real_escape_string($conn, $_POST['course']);
-    $year = (int)$_POST['year'];
-    $password = $_POST['pass'];
-    $confirm_password = $_POST['confirm'];
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $adm_no = $_POST['adm_no'];
+    $email = $_POST['email'];
+    $course = $_POST['course'];
+    $year = $_POST['year'];
+    $pass = $_POST['pass'];
+    $confirm = $_POST['confirm'];
 
-    // Validate input
-    if (empty($firstName) || empty($lastName) || empty($admNo) || empty($email) || empty($course) || empty($year) || empty($password)) {
-        $error = "All fields are required.";
-    } elseif ($password !== $confirm_password) {
-        $error = "Passwords do not match.";
-    } elseif (strlen($password) < 6) {
-        $error = "Password must be at least 6 characters long.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Invalid email format.";
+    if ($pass != $confirm) {
+        $error = 'Passwords do not match';
     } else {
-        // Check if email or admission number already exists
-        $check_sql = "SELECT * FROM users WHERE Email = ? OR Adm_No = ?";
-        $check_stmt = mysqli_prepare($conn, $check_sql);
-        mysqli_stmt_bind_param($check_stmt, "ss", $email, $admNo);
-        mysqli_stmt_execute($check_stmt);
-        $result = mysqli_stmt_get_result($check_stmt);
-
-        if (mysqli_num_rows($result) > 0) {
-            $error = "Email or Student ID already registered.";
+        $pass = password_hash($pass, PASSWORD_DEFAULT);
+        $sql = "INSERT INTO users (First_Name, Last_Name, Adm_No, Email, Course, Year_of_Study, Pass) VALUES ('$first_name', '$last_name', '$adm_no', '$email', '$course', '$year', '$pass')";
+        if (mysqli_query($conn, $sql)) {
+            $success = 'Registration successful. You can now login';
         } else {
-            // Hash password
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // Insert new user
-            $sql = "INSERT INTO users (First_Name, Last_Name, Adm_No, Email, Course, Year_of_Study, Pass, user_role, created_at, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 'user', CURRENT_TIMESTAMP, 'active')";
-            $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sssssis", $firstName, $lastName, $admNo, $email, $course, $year, $hashed_password);
-
-            if (mysqli_stmt_execute($stmt)) {
-                $success = "Registration successful! You can now login.";
-            } else {
-                $error = "Registration failed. Please try again.";
-            }
+            $error = 'An error occurred. Please try again';
         }
     }
 }
@@ -139,7 +116,9 @@ if (isset($_POST['submit'])) {
             text-decoration: underline;
         }
     </style>
-</head>
+        <?php if (!empty($error)) { echo "<p style='color: red;'>$error</p>"; } ?>
+        <?php if (!empty($success)) { echo "<p style='color: green;'>$success</p>"; } ?>
+        <form action="signup.php" method="POST">
 <body>
     <div class="container">
         <h1>Voter Registration</h1>

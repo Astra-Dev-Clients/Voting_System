@@ -29,15 +29,12 @@ $userQuery = "SELECT COUNT(*) as total_users FROM users";
 $userResult = $conn->query($userQuery);
 $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
 
-// Fetch total courses
-// $courseQuery = "SELECT COUNT(*) as total_courses FROM courses";
-// $courseResult = $conn->query($courseQuery);
-// $totalCourses = $courseResult ? $courseResult->fetch_assoc()['total_courses'] : 0;
 
-// Fetch total assignments
-// $assignmentQuery = "SELECT COUNT(*) as total_assignments FROM assignments";
-// $assignmentResult = $conn->query($assignmentQuery);
-// $totalAssignments = $assignmentResult ? $assignmentResult->fetch_assoc()['total_assignments'] : 0;
+// Fetch total candidates
+$candidatesQuery = "SELECT COUNT(*) as total_candidates FROM candidates";
+$candidatesResult = $conn->query($candidatesQuery);
+$candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_candidates'] : 0;
+
 
 ?>
 
@@ -110,11 +107,11 @@ $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Manage Courses
+                        Manage Election
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                        <li><a class="dropdown-item" href="./pages/add_course.php">Add Course</a></li>
-                        <li><a class="dropdown-item" href="./pages/view_courses.php">View Courses</a></li>
+                        <li><a class="dropdown-item" href="./pages/add_course.php">View Results</a></li>
+                        <li><a class="dropdown-item" href="./view_candidates.php">View Candidates</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -122,8 +119,9 @@ $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
                         Manage Users
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                        <li><a class="dropdown-item" href="./pages/view_users.php">View Users</a></li>
+                        <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
                         <li><a class="dropdown-item" href="./pages/add_users.php">Add User</a></li>
+                        <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -160,11 +158,11 @@ $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Manage Courses
+               Manage Election
             </a>
             <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                <li><a class="dropdown-item" href="./pages/add_course.php">Add Course</a></li>
-                <li><a class="dropdown-item" href="./pages/view_courses.php">View Courses</a></li>
+                <li><a class="dropdown-item" href="./pages/add_course.php">View Results</a></li>
+                <li><a class="dropdown-item" href="./view_candidates.php">View Candidates</a></li>
             </ul>
         </li>
         <li class="nav-item dropdown">
@@ -172,8 +170,9 @@ $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
                 Manage Users
             </a>
             <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                <li><a class="dropdown-item" href="./pages/view_users.php">View Users</a></li>
+                <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
                 <li><a class="dropdown-item" href="./pages/add_users.php">Add User</a></li>
+                <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
             </ul>
         </li>
         <li class="nav-item dropdown">
@@ -217,18 +216,19 @@ $totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
         </div>
         <div class="col-md-4">
             <div class="card p-3 text-center shadow-sm">
-                <h5 class="text-success">Total Courses</h5>
+                <h5 class="text-success">Total Candidates</h5>
                 <p class="fs-3"><i class="bi bi-book text-dark"></i> <strong>
-                     <!--echo here-->
+                     <?=$candidatestot?>
                 </strong></p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card p-3 text-center shadow-sm">
-                <h5 class="text-danger">Total Assignments</h5>
+                <h5 class="text-danger">Total Voted</h5>
                 <p class="fs-3"><i class="bi bi-pencil text-dark"></i> <strong>
-
-                 <!--echo here-->
+                  
+                <?=$voted?> / <?=$totalUsers?>
+                
                 </strong></p>
             </div>
         </div>

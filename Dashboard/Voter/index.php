@@ -133,7 +133,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
     <h4 class="text-center">User Menu</h4>
     <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="./pages/course_registration.php?uid='<?=$id?>'"><i class="bi bi-journal-text"></i> Register to Vote</a></li>
-        <li class="nav-item"><a class="nav-link " href="./pages/submit_assignment.php?uid=<?=$id?>"><i class="bi bi-clipboard-check"></i> Vote</a></li>
+        <li class="nav-item"><a class="nav-link " href="./vote.php?uid=<?=$id?>"><i class="bi bi-clipboard-check"></i> Vote</a></li>
         <li class="nav-item"><a class="nav-link" href="grades.php"><i class="bi bi-bar-chart-line"></i> View Results</a></li>
         <li class="nav-item"><a class="nav-link" href="./pages/view_messages.php"><i class="bi bi-envelope"></i> Messages</a></li>
     </ul>
@@ -162,7 +162,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
                         <i class="bi bi-clipboard-check card-icon"></i>
                         <h5 class="card-title">Vote</h5>
                         <p class="card-text">You can vote.</p>
-                        <a href="./pages/submit_assignment.php?uid=<?=$id?>" class="btn btn-light">Vote Now</a>
+                        <a href="./vote.php?uid=<?=$id?>" class="btn btn-light">Vote Now</a>
                     </div>
                 </div>
             </div>

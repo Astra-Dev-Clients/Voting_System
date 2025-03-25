@@ -3,10 +3,10 @@ session_start();
 include 'Database/db.php';
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: auth/index.php");
-    exit();
-}
+// if (!isset($_SESSION['user_id'])) {
+//     header("Location: auth/index.php");
+//     exit();
+// }
 
 // Get election status
 $sql = "SELECT * FROM election_settings WHERE status = 'active' OR status = 'completed' ORDER BY setting_id DESC LIMIT 1";

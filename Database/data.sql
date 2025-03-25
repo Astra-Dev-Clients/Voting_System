@@ -33,14 +33,13 @@ CREATE TABLE candidates (
     candidate_id INT AUTO_INCREMENT PRIMARY KEY,
     First_Name VARCHAR(50) NOT NULL,
     Last_Name VARCHAR(50) NOT NULL,
-    Position VARCHAR(100) NOT NULL,
+    position_id INT NOT NULL,
     Course VARCHAR(100) NOT NULL,
     Year_of_Study INT NOT NULL,
     Manifesto TEXT,
     Photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('active', 'inactive', 'disqualified') DEFAULT 'active',
-    FOREIGN KEY (Position) REFERENCES positions(title) ON DELETE CASCADE
 );
 
 -- Election settings table to manage election periods
@@ -51,22 +50,17 @@ CREATE TABLE election_settings (
     end_date DATETIME NOT NULL,
     status ENUM('pending', 'active', 'completed', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT,
-    FOREIGN KEY (created_by) REFERENCES users(SN)
-);
-
--- Votes table to track voting records
-CREATE TABLE votes (
-    vote_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    candidate_id INT NOT NULL,
-    position VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(SN),
-    FOREIGN KEY (candidate_id) REFERENCES candidates(candidate_id),
-    FOREIGN KEY (position) REFERENCES positions(title),
-    UNIQUE KEY unique_vote (user_id, position)
-);
+    created_by INT
+    );
+    -- Votes table to track voting records
+    CREATE TABLE votes (
+        vote_id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        candidate_id INT NOT NULL,
+        position_id INT NOT NULL,
+        voted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    );
 
 -- Campaigns table for candidate campaigns
 CREATE TABLE campaigns (
