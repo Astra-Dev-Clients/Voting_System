@@ -53,14 +53,15 @@ CREATE TABLE election_settings (
     created_by INT
     );
     -- Votes table to track voting records
-    CREATE TABLE votes (
-        vote_id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        candidate_id INT NOT NULL,
-        position_id INT NOT NULL,
-        voted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    );
+CREATE TABLE votes (
+    SN INT AUTO_INCREMENT PRIMARY KEY,
+    Course VARCHAR(255) NOT NULL,
+    user_adm VARCHAR(50) NOT NULL,
+    Cand_adm VARCHAR(50) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    voted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- Campaigns table for candidate campaigns
 CREATE TABLE campaigns (
