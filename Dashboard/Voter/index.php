@@ -135,7 +135,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
         <li class="nav-item"><a class="nav-link" href="./pages/course_registration.php?uid='<?=$id?>'"><i class="bi bi-journal-text"></i> Register to Vote</a></li>
         <li class="nav-item"><a class="nav-link " href="./vote.php?uid=<?=$id?>"><i class="bi bi-clipboard-check"></i> Vote</a></li>
         <li class="nav-item"><a class="nav-link" href="grades.php"><i class="bi bi-bar-chart-line"></i> View Results</a></li>
-        <li class="nav-item"><a class="nav-link" href="./pages/view_messages.php"><i class="bi bi-envelope"></i> Messages</a></li>
+        <li class="nav-item"><a class="nav-link" href="../../pages/view_messages.php"><i class="bi bi-envelope"></i> Messages</a></li>
     </ul>
 </div>
 

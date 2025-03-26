@@ -59,7 +59,7 @@ if (isset($_POST['vote']) && !$has_voted) {
                         VALUES ('$course', '$adm', '$cand_adm', '$position')";
 
         if (mysqli_query($conn, $insert_vote)) {
-            echo "<script>alert('Vote submitted successfully!'); window.location.href='success_page.php';</script>";
+            echo "<script>alert('Vote submitted successfully!');</script>";
         } else {
             echo "<script>alert('Error submitting vote: " . mysqli_error($conn) . "');</script>";
         }

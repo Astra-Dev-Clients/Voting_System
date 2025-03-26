@@ -35,6 +35,12 @@ $candidatesQuery = "SELECT COUNT(*) as total_candidates FROM candidates";
 $candidatesResult = $conn->query($candidatesQuery);
 $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_candidates'] : 0;
 
+// Fetch total votes
+$votesQuery = "SELECT COUNT(*) as total_votes FROM votes";
+$votesResult = $conn->query($votesQuery);
+$totalVotes = $votesResult ? $votesResult->fetch_assoc()['total_votes'] : 0;
+
+
 
 ?>
 
@@ -124,22 +130,14 @@ $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_can
                         <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
                     </ul>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Assignments
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                        <li><a class="dropdown-item" href="./pages/set_assignment.php">Set Assignments</a></li>
-                        <li><a class="dropdown-item" href="view_assignments.php">View Assignments</a></li>
-                    </ul>
-                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Messages
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                        <li><a class="dropdown-item" href="./pages/set_assignment.php">Send Messages</a></li>
-                        <li><a class="dropdown-item" href="view_assignments.php">View Messages</a></li>
+                        <li><a class="dropdown-item" href="../../pages/send_message.php">Send Messages</a></li>
+                        <li><a class="dropdown-item" href="../../pages/view_messages.php">View Messages</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -175,23 +173,15 @@ $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_can
                 <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
             </ul>
         </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Assignments
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                <li><a class="dropdown-item" href="./pages/set_assignment.php">Set Assignments</a></li>
-                <li><a class="dropdown-item" href="./pages/mark_assignments.php">View Assignments</a></li>
-            </ul>
-        </li>
+
 
         <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Messages
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                        <li><a class="dropdown-item" href="./pages/send_message.php">Send Messages</a></li>
-                        <li><a class="dropdown-item" href="./pages/view_messages.php">View Messages</a></li>
+                        <li><a class="dropdown-item" href="../../pages/send_message.php">Send Messages</a></li>
+                        <li><a class="dropdown-item" href="../../pages/view_messages.php">View Messages</a></li>
                     </ul>
                 </li>
         <li class="nav-item">
@@ -227,7 +217,7 @@ $candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_can
                 <h5 class="text-danger">Total Voted</h5>
                 <p class="fs-3"><i class="bi bi-pencil text-dark"></i> <strong>
                   
-                <?=$voted?> / <?=$totalUsers?>
+                <?=$totalVotes?> / <?=$totalUsers?>
                 
                 </strong></p>
             </div>

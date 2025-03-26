@@ -99,23 +99,13 @@ CREATE TABLE audit_log (
     FOREIGN KEY (user_id) REFERENCES users(SN)
 );
 
--- Insert default admin user (password: admin123)
-INSERT INTO users (First_Name, Last_Name, Adm_No, Email, Course, Year_of_Study, Pass, user_role)
-VALUES ('Admin', 'User', 'ADMIN001', 'admin@zetech.ac.ke', 'Administration', 1, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
--- Insert some default positions
-INSERT INTO positions (title, description, max_winners) VALUES
-('Student Body President', 'The overall leader of the student body', 1),
-('Vice President', 'Assists the president and takes over when president is unavailable', 1),
-('Secretary General', 'Handles all administrative duties of the student body', 1),
-('Treasurer', 'Manages student body finances', 1),
-('Academic Representative', 'Represents students in academic matters', 2),
-('Sports Representative', 'Coordinates sports activities', 1),
-('Entertainment Representative', 'Organizes entertainment events', 1);
 
--- Create indexes for better performance
-CREATE INDEX idx_user_email ON users(Email);
-CREATE INDEX idx_user_adm_no ON users(Adm_No);
-CREATE INDEX idx_vote_user ON votes(user_id);
-CREATE INDEX idx_vote_position ON votes(position);
-CREATE INDEX idx_candidate_position ON candidates(Position);
+
+-- 
+create table messages (
+    id int auto_increment primary key,
+     subject varchar(100) not null,
+    message text not null,
+    created_at timestamp default current_timestamp
+);
