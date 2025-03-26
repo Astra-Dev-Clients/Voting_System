@@ -7,61 +7,77 @@ if ($conn->connect_error) {
 }
 
 // Fetch user from uid
-$id = $_GET['uid'];
-
-if (!isset($id)) {
+if (!isset($_GET['uid'])) {
     header('location: ../../auth/index.php');
     exit;
 }
 
+$id = mysqli_real_escape_string($conn, $_GET['uid']);
+
 // Fetch user details
-$get_user = "SELECT * FROM users WHERE SN = $id";
-$result = mysqli_query($conn, $get_user);
-$user = mysqli_fetch_assoc($result);
+$get_user = "SELECT * FROM users WHERE SN = ?";
+$stmt = $conn->prepare($get_user);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+if (!$user) {
+    header('location: ../../auth/index.php');
+    exit;
+}
+
 $adm = $user['Adm_No'];
 $course = $user['Course'];
 
 // Fetch candidates for the course
-$get_candidates = "SELECT * FROM candidates WHERE Course = '$course'";
-$candidates = mysqli_query($conn, $get_candidates);
+$get_candidates = "SELECT * FROM candidates WHERE Course = ?";
+$stmt = $conn->prepare($get_candidates);
+$stmt->bind_param("s", $course);
+$stmt->execute();
+$candidates = $stmt->get_result();
 
-if (mysqli_num_rows($candidates) > 0) {
-    while ($row = mysqli_fetch_assoc($candidates)) {
-        $candidate[] = $row;
-    }
-} else {
-    $candidate = [];
-}
+$candidate = $candidates->fetch_all(MYSQLI_ASSOC);
 
-// Check if user has already voted
-$check_vote = "SELECT * FROM votes WHERE user_adm = '$adm'";
-$vote_result = mysqli_query($conn, $check_vote);
-$has_voted = mysqli_num_rows($vote_result) > 0;
+// Check if user has already voted for any position
+$check_vote = "SELECT * FROM votes WHERE user_adm = ?";
+$stmt = $conn->prepare($check_vote);
+$stmt->bind_param("s", $adm);
+$stmt->execute();
+$vote_result = $stmt->get_result();
+$has_voted = $vote_result->num_rows > 0;
 
 // Handle form submission
-if (isset($_POST['vote']) && !$has_voted) {
-    $cand_adm = $_POST['cand_adm'];
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['vote']) && !$has_voted) {
+    foreach ($_POST as $key => $cand_adm) {
+        if (strpos($key, 'cand_adm_') === 0) {
+            // Get position from input name
+            $position = substr($key, 9);
 
-    // Check candidate's position
-    $get_position = "SELECT Position FROM candidates WHERE Adm_No = '$cand_adm'";
-    $pos_result = mysqli_query($conn, $get_position);
-    $position = mysqli_fetch_assoc($pos_result)['Position'];
+            // Check if user already voted for this position
+            $check_position_vote = "SELECT * FROM votes WHERE user_adm = ? AND $position IS NOT NULL";
+            $stmt = $conn->prepare($check_position_vote);
+            $stmt->bind_param("s", $adm);
+            $stmt->execute();
+            $pos_vote_result = $stmt->get_result();
 
-    // Double-check: Has the user already voted for this position?
-    $check_position_vote = "SELECT * FROM votes WHERE user_adm = '$adm' AND position = '$position'";
-    $pos_vote_result = mysqli_query($conn, $check_position_vote);
+            if ($pos_vote_result->num_rows > 0) {
+                echo "<script>alert('You have already voted for the $position position.'); window.location.href='vote.php?uid=$id';</script>";
+                exit;
+            }
 
-    if (mysqli_num_rows($pos_vote_result) > 0) {
-        echo "<script>alert('You have already voted for this position.'); window.location.href='vote.php?uid=$id';</script>";
-    } else {
-        // Insert vote
-        $insert_vote = "INSERT INTO votes (Course, user_adm, Cand_adm, position) 
-                        VALUES ('$course', '$adm', '$cand_adm', '$position')";
+            // Insert or update vote
+            $insert_vote = "INSERT INTO votes (Course, user_adm, $position) VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE $position = VALUES($position)";
+            $stmt = $conn->prepare($insert_vote);
+            $stmt->bind_param("sss", $course, $adm, $cand_adm);
 
-        if (mysqli_query($conn, $insert_vote)) {
-            echo "<script>alert('Vote submitted successfully!');</script>";
-        } else {
-            echo "<script>alert('Error submitting vote: " . mysqli_error($conn) . "');</script>";
+            if ($stmt->execute()) {
+                echo "<script>alert('Vote submitted successfully!'); window.location.href='vote.php?uid=$id';</script>";
+                exit;
+            } else {
+                echo "<script>alert('Error submitting vote: " . $conn->error . "');</script>";
+            }
         }
     }
 }
@@ -69,15 +85,34 @@ if (isset($_POST['vote']) && !$has_voted) {
 ?>
 
 <?php include "../../includes/header.php"; ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voting System</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function enforceSingleSelection(position) {
+            let checkboxes = document.querySelectorAll(`input[name="cand_adm_${position}"]`);
+            checkboxes.forEach((checkbox) => {
+                checkbox.addEventListener("change", function () {
+                    checkboxes.forEach((cb) => {
+                        if (cb !== this) cb.checked = false;
+                    });
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let positions = new Set();
+            document.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                positions.add(checkbox.getAttribute("data-position"));
+            });
+
+            positions.forEach((position) => enforceSingleSelection(position));
+        });
+    </script>
 </head>
 <body class="container mt-5">
     <h2 class="text-center">Vote for Your Candidate</h2>
@@ -85,12 +120,20 @@ if (isset($_POST['vote']) && !$has_voted) {
     <?php if ($has_voted) { ?>
         <p class="alert alert-danger text-center">You have already voted. You cannot vote again.</p>
     <?php } elseif (!empty($candidate)) { ?>
-        <form method="POST" action="">
+        <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) . '?uid=' . $id; ?>">
             <div class="list-group">
-                <?php foreach ($candidate as $cand) { ?>
+                <?php 
+                $positions = [];
+                foreach ($candidate as $cand) { 
+                    $pos = htmlspecialchars($cand['Position']);
+                    if (!in_array($pos, $positions)) {
+                        echo "<h5 class='mt-3'>" . $pos . "</h5>";
+                        $positions[] = $pos;
+                    }
+                ?>
                     <label class="list-group-item">
-                        <input type="radio" name="cand_adm" value="<?= $cand['Adm_No'] ?>" required>
-                        <?= htmlspecialchars($cand['First_Name']) ?> <?= htmlspecialchars($cand['Last_Name']) ?> - <?= htmlspecialchars($cand['Position']) ?>
+                        <input type="checkbox" name="cand_adm_<?= $pos ?>" value="<?= htmlspecialchars($cand['Adm_No']) ?>" data-position="<?= $pos ?>">
+                        <?= htmlspecialchars($cand['First_Name']) ?> <?= htmlspecialchars($cand['Last_Name']) ?>
                     </label>
                 <?php } ?>
             </div>

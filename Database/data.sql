@@ -52,15 +52,25 @@ CREATE TABLE election_settings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT
     );
+
+
+
     -- Votes table to track voting records
 CREATE TABLE votes (
     SN INT AUTO_INCREMENT PRIMARY KEY,
     Course VARCHAR(255) NOT NULL,
     user_adm VARCHAR(50) NOT NULL,
-    Cand_adm VARCHAR(50) NOT NULL,
-    position VARCHAR(100) NOT NULL,
+    President VARCHAR(100) NOT NULL,
+    Welfare VARCHAR(100) NOT NULL,
+    Sports VARCHAR(100) NOT NULL,
+    Academics VARCHAR(100) NOT NULL,
     voted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE votes MODIFY Welfare VARCHAR(100) DEFAULT '';
+ALTER TABLE votes MODIFY Sports VARCHAR(100) DEFAULT '';
+ALTER TABLE votes MODIFY Academics VARCHAR(100) DEFAULT '';
+
 
 
 -- Campaigns table for candidate campaigns
