@@ -2,7 +2,7 @@
 CREATE DATABASE IF NOT EXISTS voting_system;
 USE voting_system;
 
--- Users table for voter registration
+-- Users table for both voters and admins
 CREATE TABLE users (
     SN INT AUTO_INCREMENT PRIMARY KEY,
     First_Name VARCHAR(50) NOT NULL,
@@ -12,10 +12,11 @@ CREATE TABLE users (
     Course VARCHAR(100) NOT NULL,
     Year_of_Study INT NOT NULL,
     Pass VARCHAR(255) NOT NULL,
-    user_role ENUM('user', 'admin') DEFAULT 'user',
+    role ENUM('admin', 'voter') DEFAULT 'voter',
+    admin_code VARCHAR(20) UNIQUE,
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP NULL,
-    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active'
+    last_login TIMESTAMP NULL
 );
 
 -- Positions table for different election positions
@@ -39,7 +40,8 @@ CREATE TABLE candidates (
     Manifesto TEXT,
     Photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('active', 'inactive', 'disqualified') DEFAULT 'active'
+    status ENUM('active', 'inactive', 'disqualified') DEFAULT 'active',
+    FOREIGN KEY (position_id) REFERENCES positions(position_id)
 );
 
 -- Election settings table to manage election periods
@@ -50,24 +52,22 @@ CREATE TABLE election_settings (
     end_date DATETIME NOT NULL,
     status ENUM('pending', 'active', 'completed', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT
-    );
-
-
-
-    -- Votes table to track voting records
-CREATE TABLE votes (
-    SN INT AUTO_INCREMENT PRIMARY KEY,
-    Course VARCHAR(255) NOT NULL,
-    user_adm VARCHAR(50) NOT NULL,
-    President VARCHAR(100) DEFAULT '',
-    Welfare VARCHAR(100) DEFAULT '',
-    Sports VARCHAR(100) DEFAULT '',
-    Academics VARCHAR(100) DEFAULT '',
-    voted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(SN)
 );
 
-
+-- Votes table to track voting records
+CREATE TABLE votes (
+    vote_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    position_id INT NOT NULL,
+    voted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(SN),
+    FOREIGN KEY (candidate_id) REFERENCES candidates(candidate_id),
+    FOREIGN KEY (position_id) REFERENCES positions(position_id)
+);
 
 -- Campaigns table for candidate campaigns
 CREATE TABLE campaigns (
@@ -97,21 +97,44 @@ CREATE TABLE campaign_materials (
 -- Audit log table for tracking system activities
 CREATE TABLE audit_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT,
     user_id INT,
     action VARCHAR(100) NOT NULL,
     details TEXT,
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(SN),
     FOREIGN KEY (user_id) REFERENCES users(SN)
 );
 
+-- Insert default admin user (password: admin123)
+INSERT INTO users (First_Name, Last_Name, Adm_No, Email, Course, Year_of_Study, Pass, role, admin_code)
+VALUES ('Admin', 'User', 'ADMIN001', 'admin@zetech.ac.ke', 'Administration', 1, 
+        '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 
+        'admin', 'ADMIN001');
 
+-- Insert some default positions
+INSERT INTO positions (title, description, max_winners) VALUES
+('Student Body President', 'The overall leader of the student body', 1),
+('Vice President', 'Assists the president and takes over when president is unavailable', 1),
+('Secretary General', 'Handles all administrative duties of the student body', 1),
+('Treasurer', 'Manages student body finances', 1),
+('Academic Representative', 'Represents students in academic matters', 2),
+('Sports Representative', 'Coordinates sports activities', 1),
+('Entertainment Representative', 'Organizes entertainment events', 1);
 
+-- Create indexes for better performance
+CREATE INDEX idx_user_email ON users(Email);
+CREATE INDEX idx_user_adm_no ON users(Adm_No);
+CREATE INDEX idx_user_role ON users(role);
+CREATE INDEX idx_vote_user ON votes(user_id);
+CREATE INDEX idx_vote_position ON votes(position_id);
+CREATE INDEX idx_candidate_position ON candidates(position_id);
 
--- 
-create table messages (
-    id int auto_increment primary key,
-     subject varchar(100) not null,
-    message text not null,
-    created_at timestamp default current_timestamp
+-- Messages table
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

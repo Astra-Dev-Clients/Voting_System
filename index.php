@@ -40,7 +40,7 @@ include 'includes/header.php';
                 <p class="lead">Welcome to Zetech University's secure online voting platform. Cast your vote easily and securely for student leadership positions and other important university decisions.</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start">
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <a type="button" class="btn text-white btn-lg px-4 me-md-2" style="background-color: #1C1D3C;" href="vote.php">Cast Your Vote</a>
+                        <a type="button" class="btn text-white btn-lg px-4 me-md-2" style="background-color: #1C1D3C;" href="./dashboard/voter/vote.php">Cast Your Vote</a>
                         <a type="button" class="btn btn-outline-secondary btn-lg px-4" href="results.php">View Results</a>
                     <?php else: ?>
                         <a type="button" class="btn text-white btn-lg px-4 me-md-2" style="background-color: #1C1D3C;" href="auth/index.php">Login to Vote</a>

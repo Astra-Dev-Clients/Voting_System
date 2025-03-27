@@ -1,20 +1,62 @@
 <?php
+session_start();
+require_once '../../Database/db.php';
 
-$id = $_GET['uid'];
-
-if(!isset($id)){
-    header('location: ../../auth/index.php');
+// Check if user is logged in as voter
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'voter') {
+    header('Location: ../../Auth/index.php');
+    exit();
 }
 
+// Check if election is active
+$election_status = $conn->query("SELECT * FROM election_settings WHERE status = 'active' LIMIT 1")->fetch_assoc();
 
-include "../../Database/db.php";
+// Check if user has already voted
+$has_voted = false;
+if ($election_status) {
+    $check_sql = "SELECT COUNT(*) as count FROM votes WHERE user_id = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("i", $_SESSION['user_id']);
+    $check_stmt->execute();
+    $result = $check_stmt->get_result()->fetch_assoc();
+    $has_voted = $result['count'] > 0;
+}
 
-$get_user = "SELECT * FROM users where SN = $id";
+// Fetch active positions
+$positions = $conn->query("SELECT * FROM positions WHERE status = 'active' ORDER BY title");
 
-$result = mysqli_query($conn,$get_user);
-$user = mysqli_fetch_assoc($result);
+// Fetch candidates for each position
+$candidates = [];
+while ($position = $positions->fetch_assoc()) {
+    $candidates[$position['position_id']] = $conn->query("
+        SELECT c.* 
+        FROM candidates c 
+        WHERE c.position_id = {$position['position_id']}
+    ")->fetch_all(MYSQLI_ASSOC);
+}
 
-$name = $user['First_Name'] . " " . $user['Last_Name'];
+// Handle vote submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$has_voted && $election_status) {
+    $success = true;
+    $error = '';
+
+    foreach ($_POST['votes'] as $position_id => $candidate_id) {
+        $sql = "INSERT INTO votes (user_id, position_id, candidate_id, timestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iii", $_SESSION['user_id'], $position_id, $candidate_id);
+        
+        if (!$stmt->execute()) {
+            $success = false;
+            $error = "Error recording vote. Please try again.";
+            break;
+        }
+    }
+
+    if ($success) {
+        header("Location: index.php?success=1");
+        exit();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -22,163 +64,157 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+    <title>Voter Dashboard - Zetech Voting System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f7fc;
-        }
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .navbar-brand, .nav-link {
-            color:#111 !important;
-        }
-
-        .nav-link:hover {
-            color:#fff !important;
-        }
-        /* Sidebar */
         .sidebar {
-            position: fixed;
-            top: 56px;
-            bottom: 0;
-            left: 0;
-            width: 250px;
-            background: #fff;
-            padding-top: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+            background: #2c3e50;
+            color: white;
         }
         .nav-link {
-            font-weight: 500;
-            color: #fff;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
+            color: rgba(255,255,255,.8);
         }
-        .nav-link:hover, .nav-link.active {
-            background: linear-gradient(135deg, #0052d4, #4364f7);
+        .nav-link:hover {
             color: white;
-            border-radius: 8px;
         }
-        /* Main Content */
-        .main-content {
-            margin-left: 260px;
-            padding: 20px;
+        .nav-link.active {
+            background: rgba(255,255,255,.1);
         }
-        /* Card Styling */
-        .card {
-            background: linear-gradient(135deg, #0052d4, #4364f7);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        .candidate-card {
+            transition: transform 0.3s;
         }
-        .card:hover {
+        .candidate-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        .card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        .btn-light {
-            background: white;
-            color: #0052d4;
-            border: none;
-            transition: 0.3s;
-        }
-        .btn-light:hover {
-            background: #e0e0e0;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .card {
-                margin-bottom: 20px;
-            }
         }
     </style>
 </head>
 <body>
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand text-light" href="../../index.php">Dashboard</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-light" href="#">Profile</a></li>
-                <li class="nav-item"><a class="nav-link text-light" href="#">Logout</a></li>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0 position-fixed sidebar">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">Voter Panel</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.php">
+                                <i class="fas fa-home me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="campaigns.php">
+                                <i class="fas fa-bullhorn me-2"></i> View Campaigns
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.php">
+                                <i class="fas fa-user me-2"></i> My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-danger" href="../../Auth/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </a>
+                        </li>
             </ul>
         </div>
-    </div>
-</nav>
-
-<!-- Sidebar -->
-<div class="sidebar d-none d-md-block p-3">
-    <h4 class="text-center">User Menu</h4>
-    <ul class="nav flex-column">
-        <li class="nav-item"><a class="nav-link" href="./pages/course_registration.php?uid='<?=$id?>'"><i class="bi bi-journal-text"></i> Register to Vote</a></li>
-        <li class="nav-item"><a class="nav-link " href="./vote.php?uid=<?=$id?>"><i class="bi bi-clipboard-check"></i> Vote</a></li>
-        <li class="nav-item"><a class="nav-link" href="../../results.php"><i class="bi bi-bar-chart-line"></i> View Results</a></li>
-        <li class="nav-item"><a class="nav-link" href="../../pages/view_messages.php"><i class="bi bi-envelope"></i> Messages</a></li>
-    </ul>
 </div>
 
 <!-- Main Content -->
-<main class="main-content mt-5">
-    <div class="container-fluid">
-        <h2 class="mb-4">Welcome <?=$name?></h2>
-        <p>Select an option from the sidebar.</p>
+            <div class="col-md-9 col-lg-10 ms-auto px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h2>
+                    <div>
+                        <?php if ($has_voted): ?>
+                            <span class="badge bg-success">Voted</span>
+                        <?php elseif ($election_status): ?>
+                            <span class="badge bg-warning">Election Active</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary">Election Not Active</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <i class="bi bi-journal-text card-icon"></i>
-                        <h5 class="card-title">Register to Vote</h5>
-                        <p class="card-text">Become one of the voters.</p>
-                        <a href="./vote.php?uid=<?=$id?>&message=already_registered" class="btn btn-light">Get Started</a>
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success">
+                        Your vote has been recorded successfully!
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($election_status && !$has_voted): ?>
+                    <form method="POST" action="">
+                        <?php foreach ($candidates as $position_id => $position_candidates): ?>
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <?php 
+                                        $position = $conn->query("SELECT title FROM positions WHERE position_id = $position_id")->fetch_assoc();
+                                        echo htmlspecialchars($position['title']);
+                                        ?>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <?php foreach ($position_candidates as $candidate): ?>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card candidate-card h-100">
+                                                    <div class="card-body">
+                                                        <?php if ($candidate['Photo']): ?>
+                                                            <img src="<?php echo htmlspecialchars($candidate['Photo']); ?>" 
+                                                                 class="img-fluid rounded mb-3" 
+                                                                 alt="Candidate Photo"
+                                                                 style="max-height: 150px; width: auto;">
+                                                        <?php endif; ?>
+                                                        
+                                                        <h5 class="card-title">
+                                                            <?php echo htmlspecialchars($candidate['First_Name'] . ' ' . $candidate['Last_Name']); ?>
+                                                        </h5>
+                                                        <p class="card-text">
+                                                            <small class="text-muted">
+                                                                <?php echo htmlspecialchars($candidate['Course'] . ' - Year ' . $candidate['Year_of_Study']); ?>
+                                                            </small>
+                                                        </p>
+                                                        <p class="card-text">
+                                                            <?php echo nl2br(htmlspecialchars($candidate['Manifesto'])); ?>
+                                                        </p>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="votes[<?php echo $position_id; ?>]" 
+                                                                   value="<?php echo $candidate['candidate_id']; ?>" 
+                                                                   required>
+                                                            <label class="form-check-label">
+                                                                Select this candidate
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <i class="bi bi-clipboard-check card-icon"></i>
-                        <h5 class="card-title">Vote</h5>
-                        <p class="card-text">You can vote.</p>
-                        <a href="./vote.php?uid=<?=$id?>" class="btn btn-light">Vote Now</a>
+                        <?php endforeach; ?>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Submit My Votes
+                            </button>
+                        </div>
+                    </form>
+                <?php elseif ($has_voted): ?>
+                    <div class="alert alert-info">
+                        You have already cast your vote. Thank you for participating!
                     </div>
+                <?php else: ?>
+                    <div class="alert alert-warning">
+                        The election is not currently active. Please check back later.
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <i class="bi bi-bar-chart-line card-icon"></i>
-                        <h5 class="card-title">View Results</h5>
-                        <p class="card-text">View voting results.</p>
-                        <a href="../../results.php?uid=<?=$id?>" class="btn btn-light">View Now</a>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

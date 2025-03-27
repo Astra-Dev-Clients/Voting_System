@@ -71,16 +71,16 @@ $active_election = $conn->query("SELECT * FROM election_settings WHERE status = 
                     <a class="nav-link" href="elections.php">
                         <i class="fas fa-vote-yea me-2"></i> Manage Elections
                     </a>
-                    <a class="nav-link" href="candidates.php">
+                    <a class="nav-link" href="../dashboard/admin/candidates.php">
                         <i class="fas fa-user-tie me-2"></i> Manage Candidates
                     </a>
-                    <a class="nav-link" href="positions.php">
+                    <a class="nav-link" href="../dashboard/admin/positions.php">
                         <i class="fas fa-briefcase me-2"></i> Manage Positions
                     </a>
-                    <a class="nav-link" href="voters.php">
+                    <a class="nav-link" href="../dashboard/admin/voters.php">
                         <i class="fas fa-users me-2"></i> Manage Voters
                     </a>
-                    <a class="nav-link" href="results.php">
+                    <a class="nav-link" href="../results.php">
                         <i class="fas fa-chart-bar me-2"></i> View Results
                     </a>
                     <a class="nav-link" href="settings.php">

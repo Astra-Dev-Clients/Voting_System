@@ -1,47 +1,23 @@
 <?php
-require '../../database/db.php'; // Ensure this file contains the database connection
+session_start();
+require_once '../../Database/db.php';
 
-// Check if the user is authenticated via a cookie or another method
-if (!isset($_GET['uid'])) {
-    header("Location: ../../auth/index.php"); // Redirect to login if not authenticated
+// Check if user is logged in as admin
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: ../../Auth/index.php');
     exit();
 }
 
-$id = $_GET['uid']; // Get user email from cookie
+// Fetch statistics
+$stats = [
+    'total_voters' => $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'voter'")->fetch_assoc()['count'],
+    'total_candidates' => $conn->query("SELECT COUNT(*) as count FROM candidates")->fetch_assoc()['count'],
+    'total_positions' => $conn->query("SELECT COUNT(*) as count FROM positions")->fetch_assoc()['count'],
+    'total_votes' => $conn->query("SELECT COUNT(*) as count FROM votes")->fetch_assoc()['count']
+];
 
-// Fetch user details
-$query = "SELECT * FROM users WHERE SN = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-
-if (!$user) {
-    header("Location: ../../auth/index.php"); // Redirect if user not found
-    exit();
-}else{
-    $name = $user['First_Name'] . " " . $user['Last_Name'];
-}
-
-// Fetch total users
-$userQuery = "SELECT COUNT(*) as total_users FROM users";
-$userResult = $conn->query($userQuery);
-$totalUsers = $userResult ? $userResult->fetch_assoc()['total_users'] : 0;
-
-
-// Fetch total candidates
-$candidatesQuery = "SELECT COUNT(*) as total_candidates FROM candidates";
-$candidatesResult = $conn->query($candidatesQuery);
-$candidatestot = $candidatesResult ? $candidatesResult->fetch_assoc()['total_candidates'] : 0;
-
-// Fetch total votes
-$votesQuery = "SELECT COUNT(*) as total_votes FROM votes";
-$votesResult = $conn->query($votesQuery);
-$totalVotes = $votesResult ? $votesResult->fetch_assoc()['total_votes'] : 0;
-
-
-
+// Fetch active election status
+$election_status = $conn->query("SELECT * FROM election_settings WHERE status = 'active' LIMIT 1")->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -49,182 +25,155 @@ $totalVotes = $votesResult ? $votesResult->fetch_assoc()['total_votes'] : 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+    <title>Admin Dashboard - Zetech Voting System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
         .sidebar {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            width: 250px;
-            background-color: #343a40;
-            color: white;
-            padding-top: 50px;
-        }
-        .sidebar .nav-link {
-            color: #ccc;
-        }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover {
-            background: #007bff;
+            min-height: 100vh;
+            background: #2c3e50;
             color: white;
         }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
+        .nav-link {
+            color: rgba(255,255,255,.8);
         }
-        .card {
-            border: none;
+        .nav-link:hover {
+            color: white;
+        }
+        .nav-link.active {
+            background: rgba(255,255,255,.1);
+        }
+        .stat-card {
             border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,.1);
+            transition: transform 0.3s;
         }
-        .card h5 {
-            font-weight: bold;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: relative;
-            }
-            .main-content {
-                margin-left: 0;
-            }
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
     </style>
 </head>
 <body>
-
-<!-- Navbar for mobile -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark d-md-none">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Dashboard</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Dashboard</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Manage Election
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                        <li><a class="dropdown-item" href="./pages/add_course.php">View Results</a></li>
-                        <li><a class="dropdown-item" href="./view_candidates.php">View Candidates</a></li>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0 position-fixed sidebar">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">Admin Panel</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.php">
+                                <i class="fas fa-home me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="manage_elections.php">
+                                <i class="fas fa-poll me-2"></i> Manage Elections
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="candidates.php">
+                                <i class="fas fa-user-tie me-2"></i> Manage Candidates
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="positions.php">
+                                <i class="fas fa-briefcase me-2"></i> Manage Positions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="voters.php">
+                                <i class="fas fa-users me-2"></i> Manage Voters
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="results.php">
+                                <i class="fas fa-chart-bar me-2"></i> View Results
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="settings.php">
+                                <i class="fas fa-cog me-2"></i> Settings
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-danger" href="../../Auth/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </a>
+                        </li>
                     </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Manage Users
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                        <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
-                        <li><a class="dropdown-item" href="./add_users.php">Add User</a></li>
-                        <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Messages
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                        <li><a class="dropdown-item" href="../../pages/send_message.php">Send Messages</a></li>
-                        <li><a class="dropdown-item" href="../../pages/view_messages.php">View Messages</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-danger" href="logout.php">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<!-- Sidebar for desktop -->
-<div class="sidebar d-none d-md-block">
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link active" href="#">Dashboard</a>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-               Manage Election
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                <li><a class="dropdown-item" href="./pages/add_course.php">View Results</a></li>
-                <li><a class="dropdown-item" href="./view_candidates.php">View Candidates</a></li>
-            </ul>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Manage Users
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                <li><a class="dropdown-item" href="./view_users.php">View Users</a></li>
-                <li><a class="dropdown-item" href="./add_users.php">Add User</a></li>
-                <li><a class="dropdown-item" href="./candidates.php">Register Candidate</a></li>
-            </ul>
-        </li>
-
-
-        <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="assignmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Messages
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="assignmentsDropdown">
-                        <li><a class="dropdown-item" href="../../pages/send_message.php">Send Messages</a></li>
-                        <li><a class="dropdown-item" href="../../pages/view_messages.php">View Messages</a></li>
-                    </ul>
-                </li>
-        <li class="nav-item">
-            <a class="nav-link text-danger" href="logout.php">Logout</a>
-        </li>
-    </ul>
-</div>
-
-<!-- Main Content -->
-<main class="main-content">
-    <h2>Welcome, Admin</h2>
-
-    <!-- Dashboard Cards -->
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card p-3 text-center shadow-sm">
-                <h5 class="text-primary">Total Users</h5>
-                <p class="fs-3"><i class="bi bi-people text-dark"></i> <strong>
-                    <?=$totalUsers?>
-                </strong></p>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-3 text-center shadow-sm">
-                <h5 class="text-success">Total Candidates</h5>
-                <p class="fs-3"><i class="bi bi-book text-dark"></i> <strong>
-                     <?=$candidatestot?>
-                </strong></p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-3 text-center shadow-sm">
-                <h5 class="text-danger">Total Voted</h5>
-                <p class="fs-3"><i class="bi bi-pencil text-dark"></i> <strong>
-                  
-                <?=$totalVotes?> / <?=$totalUsers?>
-                
-                </strong></p>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 ms-auto px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Dashboard</h2>
+                    <div>
+                        Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Voters</h5>
+                                <h2><?php echo $stats['total_voters']; ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Candidates</h5>
+                                <h2><?php echo $stats['total_candidates']; ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Positions</h5>
+                                <h2><?php echo $stats['total_positions']; ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Votes</h5>
+                                <h2><?php echo $stats['total_votes']; ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Election Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Active Election Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($election_status): ?>
+                            <div class="alert alert-success">
+                                <h6>Election is currently active</h6>
+                                <p class="mb-0">Start Date: <?php echo date('Y-m-d H:i:s', strtotime($election_status['start_date'])); ?></p>
+                                <p class="mb-0">End Date: <?php echo date('Y-m-d H:i:s', strtotime($election_status['end_date'])); ?></p>
+                                <p class="mb-0">Election Name: <?php echo htmlspecialchars($election_status['election_name']); ?></p>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-warning">
+                                No active election at the moment.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
