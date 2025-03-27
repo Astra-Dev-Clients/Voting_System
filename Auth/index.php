@@ -4,7 +4,6 @@ require '../database/db.php';
 $error = ""; // Initialize error message variable
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     $email_or_adm_no = trim($_POST['email_or_adm_no']);
     $password = trim($_POST['password']);
 
@@ -125,7 +124,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="error-message"><?php echo $error; ?></p>
             <p>Don't have an account? <a href="signup.php">Register</a></p>
         </form>
-       
     </div>
 </body>
 </html>

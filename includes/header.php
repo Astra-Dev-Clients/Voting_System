@@ -41,40 +41,19 @@ session_start();
                            href="about.php">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'campaigns.php' ? 'active' : ''; ?>" 
-                           href="campaigns.php">Campaigns</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo in_array(basename($_SERVER['PHP_SELF']), ['vote.php', 'results.php', 'profile.php']) ? 'active' : ''; ?>" 
-                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Voting
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="vote.php">Vote</a></li>
-                            <li><a class="dropdown-item" href="results.php">View Results</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'candidates.php' ? 'active' : ''; ?>" 
-                           href="candidates.php">Candidates</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'guidelines.php' ? 'active' : ''; ?>" 
                            href="guidelines.php">Guidelines</a>
                     </li>
-                </ul>
-                <?php if(isset($_SESSION['user_id'])): ?>
+                    <?php if(isset($_SESSION['user_id'])): ?>
                     <div class="d-flex align-items-center">
                         <span class="me-3">Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         <a href="auth/logout.php" class="btn btn-outline-danger">Logout</a>
                     </div>
-                <?php else: ?>
+                    <?php else: ?>
                     <a href="auth/index.php" class="btn text-white" style="background-color: #1C1D3C;">Get Started</a>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </ul>
             </div>
         </div>
     </nav>
-</body>
-</html> 
+    <div class="container mt-4"> 

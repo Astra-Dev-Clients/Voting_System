@@ -115,7 +115,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand text-light" href="#">Dashboard</a>
+        <a class="navbar-brand text-light" href="../../index.php">Dashboard</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -134,7 +134,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
     <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="./pages/course_registration.php?uid='<?=$id?>'"><i class="bi bi-journal-text"></i> Register to Vote</a></li>
         <li class="nav-item"><a class="nav-link " href="./vote.php?uid=<?=$id?>"><i class="bi bi-clipboard-check"></i> Vote</a></li>
-        <li class="nav-item"><a class="nav-link" href="grades.php"><i class="bi bi-bar-chart-line"></i> View Results</a></li>
+        <li class="nav-item"><a class="nav-link" href="../../results.php"><i class="bi bi-bar-chart-line"></i> View Results</a></li>
         <li class="nav-item"><a class="nav-link" href="../../pages/view_messages.php"><i class="bi bi-envelope"></i> Messages</a></li>
     </ul>
 </div>
@@ -152,7 +152,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
                         <i class="bi bi-journal-text card-icon"></i>
                         <h5 class="card-title">Register to Vote</h5>
                         <p class="card-text">Become one of the voters.</p>
-                        <a href="./pages/course_registration.php?uid=<?=$id?>" class="btn btn-light">Get Started</a>
+                        <a href="./vote.php?uid=<?=$id?>&message=already_registered" class="btn btn-light">Get Started</a>
                     </div>
                 </div>
             </div>
@@ -172,7 +172,7 @@ $name = $user['First_Name'] . " " . $user['Last_Name'];
                         <i class="bi bi-bar-chart-line card-icon"></i>
                         <h5 class="card-title">View Results</h5>
                         <p class="card-text">View voting results.</p>
-                        <a href="./pages/view_grades.php?uid=<?=$id?>" class="btn btn-light">View Now</a>
+                        <a href="../../results.php?uid=<?=$id?>" class="btn btn-light">View Now</a>
                     </div>
                 </div>
             </div>

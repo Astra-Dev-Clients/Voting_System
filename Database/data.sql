@@ -39,7 +39,7 @@ CREATE TABLE candidates (
     Manifesto TEXT,
     Photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('active', 'inactive', 'disqualified') DEFAULT 'active',
+    status ENUM('active', 'inactive', 'disqualified') DEFAULT 'active'
 );
 
 -- Election settings table to manage election periods
@@ -60,7 +60,7 @@ CREATE TABLE votes (
     SN INT AUTO_INCREMENT PRIMARY KEY,
     Course VARCHAR(255) NOT NULL,
     user_adm VARCHAR(50) NOT NULL,
-    President VARCHAR(100) DEFAULT ''L,
+    President VARCHAR(100) DEFAULT '',
     Welfare VARCHAR(100) DEFAULT '',
     Sports VARCHAR(100) DEFAULT '',
     Academics VARCHAR(100) DEFAULT '',
