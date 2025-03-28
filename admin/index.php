@@ -84,7 +84,7 @@ $active_election = $conn->query("SELECT * FROM election_settings WHERE status = 
                         <i class="fas fa-chart-bar me-2"></i> View Results
                     </a>
                    
-                    <a class="nav-link" href="../index.php">
+                    <a class="nav-link" href="../Auth/logout.php">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                     </a>
                 </nav>

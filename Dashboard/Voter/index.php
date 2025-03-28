@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$has_voted && $election_status) {
     $error = '';
 
     foreach ($_POST['votes'] as $position_id => $candidate_id) {
-        $sql = "INSERT INTO votes (user_id, position_id, candidate_id, timestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+        $sql = "INSERT INTO votes (user_id, position_id, candidate_id, voted_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iii", $_SESSION['user_id'], $position_id, $candidate_id);
         

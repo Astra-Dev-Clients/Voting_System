@@ -16,11 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add') {
             $user_id = $_POST['user_id'];
-            $position_id = $_POST['position_id'];
+    $position_id = $_POST['position_id'];
             $manifesto = trim($_POST['manifesto']);
             $photo = trim($_POST['photo']);
 
-            // Check if candidate already exists for this position
+    // Check if candidate already exists for this position
             $check_sql = "SELECT * FROM candidates WHERE First_Name = ? AND Last_Name = ? AND position_id = ?";
             $check_stmt = $conn->prepare($check_sql);
             $check_stmt->bind_param("ssi", $user['First_Name'], $user['Last_Name'], $position_id);

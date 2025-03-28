@@ -122,11 +122,11 @@ if (!$election) {
                     $candidates_sql = "SELECT c.*, COUNT(v.vote_id) as vote_count 
                                      FROM candidates c 
                                      LEFT JOIN votes v ON c.candidate_id = v.candidate_id 
-                                     WHERE c.Position = ? 
+                                     WHERE c.position_id = ? 
                                      GROUP BY c.candidate_id 
                                      ORDER BY vote_count DESC";
                     $candidates_stmt = mysqli_prepare($conn, $candidates_sql);
-                    mysqli_stmt_bind_param($candidates_stmt, "s", $position['title']);
+                    mysqli_stmt_bind_param($candidates_stmt, "i", $position['position_id']);
                     mysqli_stmt_execute($candidates_stmt);
                     $candidates_result = mysqli_stmt_get_result($candidates_stmt);
 
