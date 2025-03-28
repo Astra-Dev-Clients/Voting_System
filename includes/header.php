@@ -47,7 +47,7 @@ session_start();
                     <?php if(isset($_SESSION['user_id'])): ?>
                     <div class="d-flex align-items-center">
                         <span class="me-3">Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="auth/logout.php" class="btn btn-outline-danger">Logout</a>
+                        <a href="../admin/logout.php" class="btn btn-outline-danger">Logout</a>
                     </div>
                     <?php else: ?>
                     <a href="auth/index.php" class="btn text-white" style="background-color: #1C1D3C;">Get Started</a>

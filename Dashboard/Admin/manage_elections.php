@@ -146,7 +146,7 @@ $elections = $conn->query("SELECT * FROM election_settings ORDER BY created_at D
                             </a>
                         </li>
                         <li class="nav-item mt-4">
-                            <a class="nav-link text-danger" href="../../Auth/logout.php">
+                            <a class="nav-link text-danger" href="../../admin/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i> Logout
                             </a>
                         </li>
