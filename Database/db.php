@@ -3,7 +3,7 @@
 
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "1234218@Nanjila22";
 $dbname = "voting_system";
 
 // Create connection

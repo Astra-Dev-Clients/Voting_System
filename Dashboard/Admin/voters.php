@@ -56,6 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['count'] > 0) {
                 $error = "Cannot delete voter who has already voted";
             } else {
+                $delete_audit_log_sql = "DELETE FROM audit_log WHERE user_id = ?";
+                $delete_audit_log_stmt = $conn->prepare($delete_audit_log_sql);
+                $delete_audit_log_stmt->bind_param("i", $user_id);
+                $delete_audit_log_stmt->execute();
                 $sql = "DELETE FROM users WHERE SN = ? AND role = 'voter'";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("i", $user_id);
